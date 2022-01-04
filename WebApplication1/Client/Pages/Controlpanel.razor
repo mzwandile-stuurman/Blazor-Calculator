@@ -1,0 +1,27 @@
+﻿@page "/controlpanel"
+@inject NavigationManager NavManager
+<h1>Control Panel</h1>
+
+<button @onclick="ToDataPanel">Veiw</button>
+
+@*
+    - create a button
+    - call it view
+    - create new page
+    - call it datapanel
+    - navigate to datapanel
+
+*@
+
+
+@code {
+
+    private void ToDataPanel()
+    {
+        NavManager.NavigateTo("/datapanel");
+    }
+
+
+
+
+}

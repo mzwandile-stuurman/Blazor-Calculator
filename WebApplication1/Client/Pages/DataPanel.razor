@@ -1,0 +1,81 @@
+﻿@page "/datapanel"
+@using WebApplication1.Shared
+@inject HttpClient httpClient
+<h3>DataPanel</h3>
+<table class="table table-dark">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Expression</th>
+            <th>Resut</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+
+
+        @foreach (var memory in Memories_)
+        {
+            <tr>
+                <td>@memory.Id</td>
+                <td>@memory.Expression</td>
+                <td>@memory.Result</td>
+                <td>
+
+                    <button class="btn btn-primary btn-sm mr-2" @onclick="() => ToggleUpdateTable(memory)">Update</button>
+                    <button class="btn btn-danger btn-sm mr-2" @onclick="() =>Delete(memory.Id)">Delete</button>
+
+                </td>
+            </tr>
+        }
+
+
+
+    </tbody>
+</table>
+
+
+@code {
+
+    List<Memory_> Memories_ = new List<Memory_>();
+
+    private bool showUpdateTable = false;
+    Memory_ tempMemory = null;
+
+    protected override async Task OnInitializedAsync()
+
+    {
+
+        Memories_ = await httpClient.GetFromJsonAsync<List<Memory_>>("/api/memory");
+
+    }
+
+    private async Task DeleteMemory(Memory_ memory)
+    {
+        await httpClient.DeleteAsync($"/api/memory/{memory.Id}");
+        Memories_ = await httpClient.GetFromJsonAsync<List<Memory_>>("/api/memory");
+    }
+
+    private async Task ToggleUpdateTable(Memory_ memory)
+    {
+        showUpdateTable = !showUpdateTable;
+        tempMemory = memory;
+    }
+
+    private async Task UpdateMemory(Memory_ newMemory)
+    {
+        await httpClient.PutAsJsonAsync("/api/memory", newMemory);
+        Memories_ = await httpClient.GetFromJsonAsync<List<Memory_>>("/api/memory");
+        showUpdateTable = !showUpdateTable;
+    }
+
+    private async Task Delete(int value)
+    {
+        await httpClient.DeleteAsync($"/api/memory{value}");
+        Memories_ = await httpClient.GetFromJsonAsync<List<Memory_>>("/api/memory");
+
+    }
+
+
+
+}

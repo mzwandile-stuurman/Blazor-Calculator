@@ -1,0 +1,111 @@
+﻿@page "/memories"
+@using WebApplication1.Shared 
+@inject HttpClient httpClient
+
+<h1>Memories:</h1>
+@if(Memories_.Count != 0)
+{
+    <table class="table table-dark">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Expression</th>
+                <th>Resut</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            
+            @foreach (var memory in Memories_)
+            {
+                <tr>
+                    <td>@memory.Id</td>
+                    <td>@memory.Expression</td>
+                    <td>@memory.Result</td>
+                    <td>
+
+                    <button class="btn btn-primary btn-sm mr-2" @onclick="() => ToggleUpdateTable(memory)">Update</button>
+                    <button class="btn btn-danger btn-sm mr-2" @onclick="() =>DeleteMemory(memory)">Delete</button>
+
+                </td>
+                </tr>
+            }
+
+            
+            
+        </tbody>
+    </table>
+
+}
+else
+{
+    <p> No Data.</p>
+}
+
+@if (showUpdateTable) { 
+    <table class="table table-dark">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Expression</th>
+                <th>Result</th>
+                <th>Action</th>
+
+
+            </tr>
+        </thead>
+        <tbody>
+            @if(tempMemory != null)
+                {
+                    <tr>
+                        <td>@tempMemory.Id</td>
+                        <td><input type="text" @bind=@tempMemory.Expression /></td>
+                        <td>@tempMemory.Result</td>
+                        <td>
+                            <button class="btn btn-success btn-sm"@onclick="() => UpdateMemory(tempMemory)">Save</button>
+                        </td>
+                    </tr>
+                }
+
+        </tbody>
+    </table>
+
+}
+
+
+@code {
+
+    List<Memory_> Memories_ = new List<Memory_>();
+
+    private bool showUpdateTable = false;
+    Memory_ tempMemory = null;
+
+    protected override async  Task OnInitializedAsync()
+
+    {
+
+        Memories_ = await httpClient.GetFromJsonAsync<List<Memory_>>("/api/memory");
+
+    }
+
+    private async Task DeleteMemory(Memory_ memory)
+    {
+        await httpClient.DeleteAsync($"/api/memory/{memory.Id}");
+        Memories_ = await httpClient.GetFromJsonAsync<List<Memory_>>("/api/memory");
+    }
+
+    private async Task ToggleUpdateTable(Memory_ memory)
+    {
+        showUpdateTable = !showUpdateTable;
+        tempMemory = memory;
+    }
+
+    private async Task UpdateMemory(Memory_ newMemory)
+    {
+        await httpClient.PutAsJsonAsync("/api/memory", newMemory);
+        Memories_ = await httpClient.GetFromJsonAsync<List<Memory_>>("/api/memory");
+        showUpdateTable = !showUpdateTable;
+    }
+
+}
